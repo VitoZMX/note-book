@@ -1,4 +1,4 @@
-import React, {FC, useState} from 'react'
+import React, {FC, useCallback, useState} from 'react'
 import AppBar from '@mui/material/AppBar'
 import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
@@ -14,6 +14,10 @@ import HomeIcon from '@mui/icons-material/Home'
 import {ButtonBase, Icon} from '@material-ui/core'
 import {NavLink} from 'react-router-dom'
 import Switch from '@mui/material/Switch'
+import {useDispatch, useSelector} from 'react-redux'
+import {AppStateType} from '../../store/store'
+import {themeType} from '../../types/types'
+import {Dispatch} from 'redux'
 
 const itemsNavMenu = [
     {text: 'Главная страница', link: '/home', icon: <HomeIcon/>},
@@ -21,11 +25,18 @@ const itemsNavMenu = [
 ]
 
 type NavbarPropsType = {
-    ThemeActive: Function
+    replaceTheme: (theme: themeType) => void
 }
 
-export const Navbar: FC<NavbarPropsType> = ({ThemeActive}) => {
+export const Navbar: FC<NavbarPropsType> = ({replaceTheme}) => {
+    const themeState = useSelector((state: AppStateType) => state.app.theme)
     const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null)
+    const dispatch: Dispatch<any> = useDispatch()
+
+    const setTheme = useCallback(
+        (thm: themeType) => dispatch(replaceTheme(thm)),
+        [dispatch, replaceTheme]
+    )
 
     const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorElUser(event.currentTarget)
@@ -35,8 +46,8 @@ export const Navbar: FC<NavbarPropsType> = ({ThemeActive}) => {
         setAnchorElUser(null)
     }
 
-    const handleChangeTheme = () => {
-        ThemeActive()
+    const handleChangeTheme = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setTheme(event.target.checked ? 'dark' : 'light')
     }
 
     return (
@@ -86,7 +97,8 @@ export const Navbar: FC<NavbarPropsType> = ({ThemeActive}) => {
                                     </ButtonBase>
                                 ))}
                                 <Typography>
-                                    <Switch key={'changeTheme'} onChange={handleChangeTheme}/>
+                                    <Switch checked={themeState === 'dark'} key={'changeTheme'}
+                                            onChange={handleChangeTheme}/>
                                     Тёмная тема
                                 </Typography>
                             </Menu>

@@ -1,89 +1,59 @@
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import {HashRouter, Navigate, Route, Routes} from 'react-router-dom'
 import CssBaseline from '@mui/material/CssBaseline'
 import {Navbar} from './components/NavBar/Navbar'
 import {Preloader} from './components/common/Preloader'
-import {createTheme, ThemeProvider} from '@mui/material/styles'
+import {ThemeProvider} from '@mui/material/styles'
+import {DarkTheme, LightTheme} from './style/themeMUI'
 import {HomePage} from './components/HomePage/HomePage'
 import Container from '@mui/material/Container'
 import {NotesPage} from './components/NotesPage/NotesPage'
-
-const LightTheme = createTheme({
-    palette: {
-        primary: {
-            main: '#248ab8',
-        },
-        background: {
-            default: '#e0e5ea',
-        }
-    },
-    components: {
-        MuiAppBar: {
-            styleOverrides: {
-                root: {
-                    backgroundColor: '#01314b', // замените на ваш желаемый цвет фона AppBar
-                },
-            },
-        },
-    },
-})
-
-const DarkTheme = createTheme({
-    palette: {
-        mode: 'dark',
-        primary: {
-            main: '#248ab8',
-        },
-        text: {
-            primary: '#eff0ee',
-        },
-        background: {
-            default: '#2B2B2B',
-        }
-    },
-    components: {
-        MuiAppBar: {
-            styleOverrides: {
-                root: {
-                    backgroundColor: '#01314b', // замените на ваш желаемый цвет фона AppBar
-                },
-            },
-        },
-    },
-})
+import {useDispatch, useSelector} from 'react-redux'
+import {AppStateType} from './store/store'
+import {Dispatch} from 'redux'
+import {initializeApp, replaceTheme} from './store/app-reducer'
 
 export function App() {
-    const [loading, setLoading] = useState(false)
     const [currentTheme, setCurrentTheme] = useState(LightTheme)
+    const dispatch: Dispatch<any> = useDispatch()
+    const theme = useSelector((state: AppStateType) => state.app.theme)
+    const initialized = useSelector((state: AppStateType) => state.app.initialized)
 
-    const handleThemeChange = () => {
-        setCurrentTheme(currentTheme === LightTheme ? DarkTheme : LightTheme)
-    }
+    useEffect(() => {
+        switch (theme) {
+            case 'light':
+                setCurrentTheme(LightTheme)
+                break
+            case 'dark':
+                setCurrentTheme(DarkTheme)
+                break
+            default:
+                setCurrentTheme(LightTheme)
+                break
+        }
+    }, [theme])
+
+    useEffect(() => {
+        dispatch(initializeApp())
+    }, [dispatch])
+
+    if (initialized) return <Preloader/>
 
     return (
-        <>
-            {loading ?
-                (
-                    <Preloader/>
-                )
-                :
-                (
-                    <HashRouter>
-                        <ThemeProvider theme={currentTheme}>
-                            <CssBaseline/>
-                            <div>
-                                <Navbar ThemeActive={handleThemeChange}/>
-                                <Container>
-                                    <Routes>
-                                        <Route path="/home" element={<HomePage/>}/>
-                                        <Route path="/notes" element={<NotesPage/>}/>
-                                        <Route path="/*" element={<Navigate to={'/home'}/>}/>
-                                    </Routes>
-                                </Container>
-                            </div>
-                        </ThemeProvider>
-                    </HashRouter>
-                )}
-        </>
+        <HashRouter>
+            <ThemeProvider theme={currentTheme}>
+                <CssBaseline/>
+                <div>
+                    <Navbar replaceTheme={replaceTheme}/>
+                    <Container>
+                        <Routes>
+                            <Route path="/home" element={<HomePage/>}/>
+                            <Route path="/notes" element={<NotesPage/>}/>
+                            <Route path="/*" element={<Navigate to={'/home'}/>}/>
+                        </Routes>
+                    </Container>
+                </div>
+            </ThemeProvider>
+        </HashRouter>
     )
 }
