@@ -1,29 +1,38 @@
 import * as actionType from './actionTypes'
-import {INoteType } from '../types/types'
+import {INoteType} from '../types/types'
 import {BaseThunkType, InferActionsTypes} from './store'
 import {notesAPI} from '../api/notes-api'
 
-const initialState  = {
+const initialState = {
     notes: [] as Array<INoteType>,
-    tagFilter: [] as Array<string>,
+    tagsFilter: [] as Array<string>,
+    selectedTagFilter: [] as Array<string>,
 }
 
 const notesReducer = (state = initialState, action: ActionsType): InitialStateType => {
     switch (action.type) {
         case actionType.ADD_NOTE:
-            const newNote :INoteType = {
+            const newNote: INoteType = {
                 id: action.note.id,
                 text: action.note.text,
-                tag: action.note.tag,
+                tags: action.note.tags,
+                date: action.note.date
             }
             return {
                 ...state,
-                notes: state.notes.concat(newNote),
+                notes: [newNote].concat(state.notes),
+                tagsFilter: [...state.tagsFilter, ...action.note.tags]
             }
-        case actionType.ADD_TAG:
+        case actionType.ADD_SELECTED_TAG:
             return {
                 ...state,
-                tagFilter: action.tags,
+                selectedTagFilter: action.tags,
+            }
+        case actionType.ADD_ALL_TAGS:
+            const tagsArray: string[] = state.notes.flatMap(note => note.tags)
+            return {
+                ...state,
+                tagsFilter: [...tagsArray],
             }
         case actionType.ADD_EDIT_NOTE:
             const updatedNotesAfterEditing = state.notes.map(note => {
@@ -31,7 +40,7 @@ const notesReducer = (state = initialState, action: ActionsType): InitialStateTy
                     return {
                         ...note,
                         text: action.note.text,
-                        tag: action.note.tag
+                        tags: action.note.tags
                     }
                 }
                 return note
@@ -63,7 +72,8 @@ export const actions = {
     setNewNoteAction: (note: INoteType) => ({type: actionType.ADD_NOTE, note: note} as const),
     setEditNoteAction: (note: INoteType) => ({type: actionType.ADD_EDIT_NOTE, note: note} as const),
     deleteNoteAction: (note: INoteType) => ({type: actionType.REMOVE_NOTE, note: note} as const),
-    setTagFilterNoteAction: (tags: string[]) => ({type: actionType.ADD_TAG, tags: tags,} as const),
+    setSelectTagFilterNoteAction: (tags: string[]) => ({type: actionType.ADD_SELECTED_TAG, tags: tags,} as const),
+    setTagFilterNoteAction: () => ({type: actionType.ADD_ALL_TAGS} as const),
 }
 
 export const getAllNotesAction = (): ThunkType => async (dispatch) => {
@@ -72,8 +82,8 @@ export const getAllNotesAction = (): ThunkType => async (dispatch) => {
 }
 
 export const addNote = (note: INoteType): ThunkType => async (dispatch) => {
-    await notesAPI.setNote(note)
-    dispatch(actions.setNewNoteAction((note)))
+    const date = await notesAPI.setNote(note)
+    dispatch(actions.setNewNoteAction(({...note, date: date})))
 }
 
 export const addEditNote = (note: INoteType): ThunkType => async (dispatch) => {
@@ -86,8 +96,12 @@ export const removeNote = (note: INoteType): ThunkType => async (dispatch) => {
     dispatch(actions.deleteNoteAction(note))
 }
 
-export const addTagFilter = (tags: string[]): ThunkType => async (dispatch) => {
-    dispatch(actions.setTagFilterNoteAction(tags))
+export const addSelectTagFilter = (tags: string[]): ThunkType => async (dispatch) => {
+    dispatch(actions.setSelectTagFilterNoteAction(tags))
+}
+
+export const addTagFilter = (): ThunkType => async (dispatch) => {
+    dispatch(actions.setTagFilterNoteAction())
 }
 
 export type InitialStateType = typeof initialState

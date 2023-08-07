@@ -29,10 +29,11 @@ const MenuPropsStyle = {
 
 type FilterTagsPropsType = {
     tags: string[]
+    SelectedTags: string[]
     addTagFilter: (tags: string[]) => void
 }
 
-export function FilterTags({tags, addTagFilter}: FilterTagsPropsType) {
+export function FilterTags({tags, addTagFilter, SelectedTags}: FilterTagsPropsType) {
     const [tagNote, setTagNote] = useState<string[]>([])
     const theme = useTheme()
     const labelSelect = 'Теги фильтра'
@@ -61,7 +62,6 @@ export function FilterTags({tags, addTagFilter}: FilterTagsPropsType) {
         setTagNote(
             typeof value === 'string' ? value.split(',') : value,
         )
-
     }
 
     const handleClickClearFilter = () => {
@@ -77,7 +77,7 @@ export function FilterTags({tags, addTagFilter}: FilterTagsPropsType) {
                         labelId="multipleChipLabel"
                         id="multipleChip"
                         multiple
-                        value={tagNote}
+                        value={SelectedTags}
                         size="small"
                         onChange={handleChangeFilter}
                         input={<OutlinedInput id="selectMultipleChip" label={labelSelect}/>}
@@ -98,10 +98,7 @@ export function FilterTags({tags, addTagFilter}: FilterTagsPropsType) {
                         MenuProps={MenuPropsStyle}>
 
                         {removeDuplicatesTags(tags).map((tag) => (
-                            <MenuItem
-                                key={tag}
-                                value={tag}
-                            >
+                            <MenuItem key={tag} value={tag}>
                                 {tag}
                             </MenuItem>
                         ))}

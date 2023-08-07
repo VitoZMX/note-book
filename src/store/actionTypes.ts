@@ -3,7 +3,8 @@ export const ADD_NOTE = 'ADD_NOTE'
 export const ADD_EDIT_NOTE = 'ADD_EDIT_NOTE'
 export const REMOVE_NOTE = 'REMOVE_NOTE'
 
-export const ADD_TAG = 'ADD_TAG'
+export const ADD_ALL_TAGS = 'ADD_ALL_TAGS'
+export const ADD_SELECTED_TAG = 'ADD_SELECTED_TAG'
 
 export const INITIALIZED_SUCCESS = 'INITIALIZED_SUCCESS'
 export const SET_THEME = 'SET_THEME'

@@ -10,9 +10,10 @@ import {Dispatch} from 'redux'
 import {useDispatch} from 'react-redux'
 import s from './NoteItem.module.sass'
 import TextField from '@mui/material/TextField'
-import {parseNoteData} from '../../../utils/utils'
+import {convertSecondsToDateTime, parseNoteData} from '../../../utils/utils'
 import Box from '@mui/material/Box'
 import {TextNoteItem} from './TextNoteItem/TextNoteItem'
+import Typography from '@mui/material/Typography'
 
 type NoteItemPropsType = {
     note: INoteType
@@ -21,7 +22,7 @@ type NoteItemPropsType = {
 }
 
 export const NoteItem: FC<NoteItemPropsType> = ({note, delNote, editNote}) => {
-    const NoteTextTag = `${note.text} ${note.tag}`
+    const NoteTextTag = `${note.text} ${note.tags.join(' ')}`
     const [editMode, setEditMode] = useState<boolean>(false)
     const [noteTextValue, setNoteTextValue] = useState<string>(NoteTextTag)
     const dispatch: Dispatch<any> = useDispatch()
@@ -62,15 +63,21 @@ export const NoteItem: FC<NoteItemPropsType> = ({note, delNote, editNote}) => {
                 <TextField multiline className={s.textField} minRows={1} maxRows={4}
                            value={noteTextValue} variant="standard" onChange={handleChangeValueEditNote}/>
             ) : (
-                <TextNoteItem text={note.text} tag={note.tag}/>
+                <TextNoteItem text={note.text} tags={note.tags}/>
             )}
 
             <Box className={s.btnGroup}>
-                <IconButton onClick={handleClickEditMode}>
-                    {editMode ? <DoneIcon color="success"/> : <ModeEditIcon color="primary"/>}
-                </IconButton>
-                {editMode ? <IconButton onClick={handleClickCloseEditMode}><CloseIcon color="warning"/></IconButton>
-                    : <IconButton onClick={() => deleteNote(note)}><DeleteForeverIcon color="primary"/></IconButton>}
+                {editMode ? (<>
+                        <Typography mr="auto" variant={'body2'}
+                                    color="primary">{convertSecondsToDateTime(note.date.seconds)}</Typography>
+                        <IconButton onClick={handleClickEditMode}><DoneIcon color="success"/></IconButton>
+                        <IconButton onClick={handleClickCloseEditMode}><CloseIcon color="warning"/></IconButton>
+                    </>)
+                    : (<>
+                        <IconButton onClick={handleClickEditMode}><ModeEditIcon color="primary"/></IconButton>
+                        <IconButton onClick={() => deleteNote(note)}><DeleteForeverIcon color="primary"/></IconButton>
+                    </>)}
+
             </Box>
         </Card>
     )

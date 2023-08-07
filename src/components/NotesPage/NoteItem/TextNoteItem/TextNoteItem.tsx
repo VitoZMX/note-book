@@ -6,18 +6,21 @@ import {useTheme} from '@mui/material/styles'
 
 type TextNoteItemPropsType = {
     text: string
-    tag: string
+    tags: string[]
 }
 
-export const TextNoteItem: FC<TextNoteItemPropsType> = ({text, tag}) => {
+export const TextNoteItem: FC<TextNoteItemPropsType> = ({text, tags}) => {
     const theme = useTheme()
 
     return (
         <Box className={s.textNote}>
             <Typography variant="body1">{text}
-                {tag.length !== 0 && (
-                    <Box component="span" sx={{backgroundColor: theme.palette.secondary.main}}
-                         className={s.tagNote}>{tag}</Box>
+                {tags.length !== 0 && (
+                    tags.map((tag) => (
+                        <Box component="span" key={`${text}_${tag}`}
+                             sx={{backgroundColor: theme.palette.secondary.main}}
+                             className={s.tagNote}>{tag}</Box>
+                    ))
                 )}</Typography>
         </Box>
     )

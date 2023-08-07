@@ -5,18 +5,25 @@ import {NoteItem} from './NoteItem/NoteItem'
 import {FilterTags} from './FilterTags/FilterTags'
 import {CreateNewNote} from './CreateNewNote/CreateNewNote'
 import {INoteType} from '../../types/types'
-import {FC} from 'react'
+import {FC, useEffect} from 'react'
 import {filterNotesByTags} from '../../utils/utils'
-import {shallowEqual, useSelector} from 'react-redux'
+import {shallowEqual, useDispatch, useSelector} from 'react-redux'
 import {AppStateType} from '../../store/store'
-import {addEditNote, addNote, addTagFilter, removeNote} from '../../store/notes-reducer'
+import {addEditNote, addNote, addSelectTagFilter, addTagFilter, removeNote} from '../../store/notes-reducer'
+import {Dispatch} from 'redux'
 
 type NotesPagePropsType = {}
 
 export const NotesPage: FC<NotesPagePropsType> = () => {
+    const dispatch: Dispatch<any> = useDispatch()
 
-    const tags: string[] = useSelector(
-        (state: AppStateType) => state.notes.tagFilter,
+    const AllTags: string[] = useSelector(
+        (state: AppStateType) => state.notes.tagsFilter,
+        shallowEqual
+    )
+
+    const SelectedTags: string[] = useSelector(
+        (state: AppStateType) => state.notes.selectedTagFilter,
         shallowEqual
     )
 
@@ -25,7 +32,11 @@ export const NotesPage: FC<NotesPagePropsType> = () => {
         shallowEqual
     )
 
-    const VisibleNotes = filterNotesByTags(notes, tags)
+    useEffect(() => {
+        dispatch(addTagFilter())
+    }, [dispatch, notes])
+
+    const VisibleNotes = filterNotesByTags(notes, SelectedTags)
 
     return (
         <Box sx={{mb: 5}}>
@@ -45,7 +56,7 @@ export const NotesPage: FC<NotesPagePropsType> = () => {
                     <Typography variant="h6" gutterBottom>
                         Фильтрация заметок по тегу
                     </Typography>
-                    <FilterTags addTagFilter={addTagFilter} tags={notes.map((note) => note.tag)}/>
+                    <FilterTags addTagFilter={addSelectTagFilter} SelectedTags={SelectedTags} tags={AllTags}/>
                 </Grid>
             </Grid>
 
